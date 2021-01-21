@@ -16,9 +16,11 @@ if (isset($_SESSION['id'])) {
 
     $user = new user(NULL, NULL);
 
+
     // connexion user
     $user->connect();
     $user->makeReservation();
+
 }
 else {
     header('location: connexion.php');
@@ -49,15 +51,15 @@ début, date de fin.-->
 
 
         <div class="txt_field">
-            <input type="datetime-local" name="timestart">
+            <input type="datetime-local" name="timestart" step="3600">
             <span></span>
-            <label for="timestart">Début de la réservation</label>
+            <label for="timestart">Réservez de :</label>
         </div>
 
         <div class="txt_field">
-            <input type="datetime-local" name="timeend">
+            <input type="datetime-local" name="timeend" step="3600">
             <span></span>
-            <label for="timeend">Fin de la réservation</label>
+            <label for="timeend">à :</label>
         </div>
 
 

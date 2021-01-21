@@ -18,6 +18,7 @@ if (isset($_SESSION['id'])) {
 
     // connexion user
     $user->connect();
+
 }
 else {
     header ('location: connexion.php');
@@ -35,7 +36,7 @@ connectées peuvent accéder aux événements.-->
 
 <!--Affichage des résevations-->
 <div class="reservation">
-    <h1>Réservations: </h1>
+    <h1>La réservation: </h1>
 
     <table>
         <thead>
@@ -46,7 +47,6 @@ connectées peuvent accéder aux événements.-->
             //aficher tous les champs de la table
             foreach ($nomchamp as $result)
             {
-
                 foreach ($result as $key => $value) {
                     echo '<td>' .$value.'</td>';
                 }
@@ -69,8 +69,7 @@ connectées peuvent accéder aux événements.-->
         </tbody>
     </table>
     <div class="signup_link">
-        <a href="inscription.php">Inscription</a> <br>
-        <a href="connexion.php">Connexion</a> <br>
+        <a href="planning.php">Planning</a> <br>
         <a href="index.php">Accueil</a>
     </div>
 </div>

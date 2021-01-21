@@ -14,7 +14,6 @@ class user {
         $this->bddpass = $bddpass;
         $this->db = $this->db_connect();
     }
-
     
     public function db_connect() { //static??
 
@@ -36,18 +35,12 @@ class user {
         }
     }
 
-    /*public function checklogin() {
-        //on fait la requête dans la bd pour rechercher si ces données existent:
-        $sql= "SELECT * FROM `utilisateurs` WHERE `login`='$login'";
-        $data = $this->db->prepare($sql);
-        $data->execute(['login'=>$login]);
-        $row = $data->fetch(PDO::FETCH_ASSOC);
-        if(count($row) >0)
-        {
-            echo 'login exist déjà';
-            exit;
-        }// fin login exist déjà
-    }*/
+    public function checklogin($login) {
+        $stm = $this->db -> prepare("SELECT login FROM utilisateurs WHERE login =:login");
+        $stm -> execute(["login"=>$login]);
+        $result = $stm->fetch();
+        return $result;
+    }
 
     public function register() {
 
@@ -101,7 +94,6 @@ class user {
     public function connect() {
 
         $this->db_connect();
-        $db = $this->db_connect();
 
         if (isset($_POST['connexion']))
         {
@@ -160,24 +152,34 @@ class user {
                 $newpass = htmlspecialchars(trim($_POST['new_pass']));
 
                 //on vérif si le login a changé et s'il est déjà prit dans la bdd
-                // PROBLEME on ne peu pas changer le login seul !!!!!!!!!!!!!!!
-                if (($_POST['login']) != ($_SESSION['login']))
+                if (($_POST['login']) != ($_SESSION['login']) && (empty($_POST['password'])) && (empty($_POST['new_pass'])) && (empty($_POST['confirm_new_pass'])))
                 {
-                    //on fait la requête dans la bd pour rechercher si ces données existent:
-                    $sql= "SELECT * FROM `utilisateurs` WHERE `login`= :login";
-                    $data = $this->db->prepare($sql);
-                    $data->execute(['login'=>$login]);
-                    $row = $data->fetch(PDO::FETCH_ASSOC);
-                    var_dump($row); /// boolean false ???????????????????????
-                    if(count($row['login']) >0)
+                    $checklogin = $this->checklogin($login);
+                    if ($checklogin)
                     {
-                        echo 'login exist déjà';
+                        echo 'login exist déjà. <a href="profil.php">Profil</a> ';
                         exit;
                     }// fin login exist déjà
+                    else {
+                        $sql= "UPDATE `utilisateurs` SET `login`= :login WHERE `id` = :id";
+                        $stm=$this->db->prepare($sql);
+                        $stm->execute(['login'=>$login,  'id'=>$id]);
+                        //on redéfini les session avec les nouvelles informations (si on ne fait pas ça les modificatoins ne seront pas visible sur le form)
+                        $_SESSION['login'] = $login;
+                        //s'assurer que la requ^te a marché, car pas de redirection avec header location
+                        if ($stm) {
+                            echo 'la modification du login a été prise en compte. <a href="profil.php">Profil</a> ';
+                            exit();
+                        }
+                        else {
+                            echo 'la modification du login a échouée. <a href="profil.php">Profil</a> ';
+                            exit();
+                        }
+                    }
                 }// fin isset changement du login
 
                 //je verif si le password est bon:
-                $sql= "SELECT password FROM `utilisateurs` WHERE id = $id";
+                $sql= "SELECT password FROM `utilisateurs` WHERE id = :id";
                 //je fait la requête pour le password qui correspont au login.
                 $data = $this->db->prepare($sql);
                 $data->execute(['id'=>$id]);
@@ -206,23 +208,30 @@ class user {
                             //on sécurise le nouveau mdp
                             $hashpass = password_hash($newpass, PASSWORD_BCRYPT);
                             //on l'ajoute dans la bdd
-                            $sql= "UPDATE `utilisateurs` SET `login`= '$login', password='$hashpass' WHERE `id` = '$id'";
+                            $sql= "UPDATE `utilisateurs` SET `login`= :login, password= :password WHERE `id` = :id";
                             $stm=$this->db->prepare($sql);
                             $stm->execute(['login'=>$login, 'password'=>$hashpass, 'id'=>$id]);
                             //on redéfini les session avec les nouvelles informations (si on ne fait pas ça les modificatoins ne seront pas visible sur le form)
                             $_SESSION['login'] = $login;
                             //s'assurer que la requ^te a marché, car pas de redirection avec header location
                             if ($stm) {
-                                echo 'la modification a été prise en compte';
+                                echo 'la modification a été prise en compte. <a href="profil.php">Profil</a> ';
+                                exit();
                             }
                             else {
-                                echo 'la modification a échouée';
+                                echo 'la modification a échouée. <a href="profil.php">Profil</a> ';
+                                exit();
                             }
                         }
                     }
                 }// fin password correct avec password verify
+                if (($_POST['login']) != ($_SESSION['login']) && (!empty($_POST['password']))) {
+                    echo 'vous n avez pas besoin de votre mot de passe pour changer de login seulement. <a href="profil.php">Profil</a> ';
+                    exit();
+                }
                 else {
-                    echo 'mdp actuel incorrect';
+                    echo 'mdp actuel incorrect. <a href="profil.php">Profil</a> ';
+                    exit();
                 }
             }
         }
@@ -243,90 +252,86 @@ class user {
 
             // vérifier que tous les champs soient remplis
 
-            if (!isset($title)){
+            if (empty($title)){
                 echo 'Entrez un titre';
             }
-            else if (!isset($description)) {
+            else if (empty($description)) {
                 echo 'Ecrivez un mot en description';
             }
             else if (strlen($description) <3) {
                 echo 'La description doit faire au moins 3 charactères';
             }
-            else if (!isset($timeStart)) {
+            else if (empty($timeStart)) {
                 echo 'Entrez une date de début';
             }
-            else if (!isset($timeEnd)) {
+            else if (empty($timeEnd)) {
                 echo 'Entrez une date de fin';
             }
             // maintenant tous les champs sont remplis
             else {
+                //
+                $debutHeure = date_create($timeStart);
+                $heure_debut = date_format($debutHeure ,'G'); // Heure, au format 24h, sans les zéros initiaux
+                $jour_debut = date_format($debutHeure ,'N'); // 1 (pour Lundi) à 7 (pour Dimanche)
 
-                $hourBegins_number = date_create($timeStart);
-                $hourBegins = date_format($hourBegins_number ,'H'); // renvoi 15H00 pour ex
-                $dayBegins = date_format($hourBegins_number ,'N'); // lundi 1, dimanche 7
+                $finHeure = date_create($timeEnd);
+                $heure_fin = date_format($finHeure ,'G');
+                $jour_fin = date_format($finHeure ,'N');
 
-                $hourEnds_number = date_create($timeEnd);
-                $hourEnds = date_format($hourEnds_number ,'H');
-                $dayEnds = date_format($hourEnds_number ,'N');
+                $interval = $heure_fin - $heure_debut ;
 
-                //on fait la requête
-                $sql= 'INSERT INTO `reservations`(`titre`, `description`, `debut`, `fin`, `id_utilisateur`) VALUES (:titre, :description, :debut, :fin, :id_utilisateur)';
-                $stm=$this->db->prepare($sql);
+                //on verif si le creneau horaire est disponible
+                $sqlcreneau = 'SELECT COUNT(*) FROM reservations WHERE debut = :datedebut OR fin = :datefin'; //Pour connaître le nombre de lignes totales dans une table, il suffit d’effectuer la requête SQL ci contre
+                $stmcreneau = $this->db->prepare($sqlcreneau);
 
-                if ($stm->execute([
-                    'titre' => $title,
-                    'description' => $description,
-                    'debut' => $timeStart,
-                    'fin' => $timeEnd,
-                    'id_utilisateur' => $id
-                ])) {
-                    echo 'Votre résevation est enregistrée';
-                    //header('location:planning.php');
+                $stmcreneau->execute([
+                    'datedebut'=> $timeStart,
+                    'datefin' => $timeEnd
+                ]);
+
+                $creneauPris = $stmcreneau->fetchColumn();
+                //
+
+                if($creneauPris == 0 && $interval == 1 && $jour_debut == $jour_fin && $jour_debut > 0 && $jour_debut < 6 && $heure_debut >= 8 && $heure_debut <= 18 && $heure_fin >= 9 && $heure_fin <= 19 && $heure_fin > $heure_debut )
+                {
+                    //on fait la requête
+                    $sql = 'INSERT INTO `reservations`(`titre`, `description`, `debut`, `fin`, `id_utilisateur`) VALUES (:titre, :description, :debut, :fin, :id_utilisateur)';
+                    $stm = $this->db->prepare($sql);
+                    if ($stm->execute([
+                        'titre' => $title,
+                        'description' => $description,
+                        'debut' => $timeStart,
+                        'fin' => $timeEnd,
+                        'id_utilisateur' => $id
+                    ])) {
+                        echo 'Votre résevation est enregistrée. Vérifiez le planning ici : <a href="planning.php">Planning</a>';
+                        //header('location:planning.php');
+                    }
+                }
+                elseif ($interval > 1 || $jour_debut != $jour_fin || $jour_debut == 6 OR $jour_debut == 7 || $heure_debut < 8 OR $heure_debut > 18 OR $heure_fin < 9 OR $heure_fin > 19 || $heure_fin <= $heure_debut) {
+                    echo 'Les reservations se font du lundi au vendredi de 8h à 19h pour une durée de 1h. Réservez plusieurs fois si necessaire. Vérifiez le planning ici : <a href="planning.php">Planning</a>';
+                }
+                elseif ( $creneauPris > 0) {
+                    echo 'Créneau horaire indisponible. Vérifiez le planning ici : <a href="planning.php">Planning</a>';
                 }
             }
         }
     }
-    public function reservation(){
-
-            $date = new DateTime($Ddate);
-
-            if($date->format('N') == 6 || $date->format('N') == 7){
-
-                echo '<section class="alert alert-danger text-center" role="alert"><b>Attention !</b> Les réservations se font <b>uniquement du lundi au vendredi</b>.</section>';
-
-            }
-            else{
-
-                $statement = $this->db->prepare("INSERT INTO reservations (titre, description, debut, fin, id_utilisateur) VALUES (:titre, :description, :debut, :fin, :id_utilisateur)");
-
-                $statement->execute([
-                    "titre"=>$titre,
-                    "description"=>$description,
-                    "debut"=>$Ddate,
-                    "fin"=>$Fdate,
-                    "id_utilisateur"=>$id_user
-                ]);
-
-                echo '<section class="alert alert-success text-center" role="alert"><b>Réservation éffectuée</b></section>';
-            }
-        }
-    }
-
 
     public function showReservation()
     {
         // connexion à la bdd
         $this->db_connect();
         //transformation des session en variables
-        $id = $_SESSION['id'];
+        $id = $_GET['id'];
         //Requête select l'ensemble des informations de l'utlisateur connecté
-        $sql= "SELECT * FROM `reservations` WHERE `id_utilisateur` = :id_utilisateur";
+        $sql= "SELECT * FROM `reservations` WHERE `id` = :id";
         $stm=$this->db->prepare($sql);
-        $stm->bindParam(':id_utilisateur', $id);
-        $stm->execute();
+        $stm->execute(['id'=>$id]);
         $result = $stm->fetchAll(PDO::FETCH_ASSOC);
         return $result;
     }
+
     public function showTitleReservation()
     {
         // connexion à la bdd
@@ -339,18 +344,24 @@ class user {
         return $result;
     }
 
-    /*public function slot()
+    public function planning($jour,$heure)
     {
-        $id = $_SESSION['id'];
-        $login = $_SESSION['login'];
-
-        //array_search pourrait être utiliser pour savoir si l'user à bien choisi un jour de la semaine
-        $day = array('lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi');
-        $timeslot = array('08-09', '09-10', '10-11', '11-12', '12-13', '13-14', '14-15', '15-16', '16-17', '17-18', '18-19');
-
-        else
-            echo 'Vous pouvez réserver la salle du lundi au vendredi, de 8h00 à 19hOO pour une durée de 1H.';
-    }*/
+        $this->db_connect();
+        $sql ='SELECT login,reservations.id,titre,description,debut,fin,id_utilisateur FROM utilisateurs INNER JOIN reservations ON utilisateurs.id = reservations.id_utilisateur WHERE DATE_FORMAT(debut, "%w") = :jour AND DATE_FORMAT(debut, "%k") = :heure ';
+        $stm = $this->db->prepare($sql);
+        $stm->execute(['jour'=>$jour, 'heure'=>$heure]);
+        $result = $stm->fetch();
+        //var_dump($result);
+        if($result)
+        {
+            $_GET['id'] = @$result['id'];
+            //var_dump($_GET);
+            echo '<td><a href="reservation.php?id='.$_GET['id'].'">'.$result['login'].'<br>'.$result['titre'].'</a></td>';
+        }
+        else{
+            echo '<td>Crénaux disponible</td>' ;
+        }
+    }
 
 }
 ?>

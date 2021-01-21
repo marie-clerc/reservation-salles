@@ -7,21 +7,13 @@
     <title>Résevation</title>
 </head>
 <?php
-// ouverture de la session
 session_start();
-// Vérifiez si l'utilisateur est connecté, sinon redirige-le vers la page de connexion
-if (isset($_SESSION['id'])) {
+require('classes/user-pdo.php');
 
-    require('classes/user-pdo.php');
+$user = new user(NULL, NULL);
 
-    $user = new user(NULL, NULL);
-
-    // connexion user
-    $user->connect();
-}
-else {
-    header('location: connexion.php');
-}
+// connexion user
+$user->connect();
 ?>
 <body>
 <!--Une page permettant de voir le planning de la salle
@@ -35,42 +27,43 @@ utilisateur clique sur une réservation, il est amené sur une page dédiée.
 Les réservations se font du lundi au vendredi et de 8h et 19h. Les créneaux
 ont une durée fixe d’une heure.-->
 
-<table>
-    <thead>
-    <tr>
-        <td>CRENEAUX</td>
-        <td>LUNDI</td>
-        <td>MARDI</td>
-        <td>MERCREDI</td>
-        <td>JEUDI</td>
-        <td>VENDREDI</td>
-    </tr>
-    </thead>
-    <tbody>
-    <?php
+<div class="reservation">
+    <h1>Planning: </h1>
 
-    for ($slot = 8; $slot <= 19; $slot++)
-    {
-        echo '<tr></tr>';
-        for ($jour = 0; $jour= 5; $jour++) {
-            '<td></td>';
-        }
+    <table>
+        <thead>
+        <tr>
+            <th></th>
+            <th>Lundi</th>
+            <th>Mardi</th>
+            <th>Mercredi</th>
+            <th>Jeudi</th>
+            <th>Vendredi</th>
+        </tr>
+        </thead>
+        <tbody>
+            <?php
+            for($heure = 8 ; $heure <= 19 ; $heure++)
+            {
+                echo '<tr></tr>';
+                for($jour = 0 ; $jour <= 5 ; $jour++)
+                {
+                    if($jour == 0)
+                    {
+                        echo '<th>' .$heure.'h </th>';
+                    }
+                    else{
+                        $user->planning($jour,$heure);
+                    }
+                }
+            }
+            ?>
+        </tbody>
+    </table>
 
-    }
-
-    %w
-    if w = 6 ou 0 ne pas prendre car c'est seaedi et diamnce'
-    https://www.php.net/manual/fr/datetime.format.php
-
-
-    ?>
-    </tbody>
-</table>
-<div class="signup_link">
-    <a href="inscription.php">Inscription</a> <br>
-    <a href="connexion.php">Connexion</a> <br>
-    <a href="index.php">Accueil</a>
+    <div class="signup_link">
+        <a href="index.php">Accueil</a>
+    </div>
 </div>
-
 </body>
 </html>
