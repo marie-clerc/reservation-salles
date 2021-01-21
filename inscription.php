@@ -20,7 +20,28 @@
     “utilisateurs” (sauf “id”) ainsi qu’une confirmation de mot de passe. Dès
     qu’un utilisateur remplit ce formulaire, les données sont insérées dans la
     base de données et l’utilisateur est redirigé vers la page de connexion.-->
-    
+
+
+    <header>
+        <h1>Salle de conférence</h1>
+        <section>
+            <a href="index.php">Accueil</a>
+            <a href="reservation-form.php">Réservez</a>
+            <a href="planning.php">Planning</a>
+            <?php //si l'utilisateur est connecté
+            if (isset($_SESSION['login']))
+                // echo les liens necessaire
+                echo ('<a href="profil.php">Profil</a></section>
+                <form action="index.php" method="post"><input type="submit" name="deconnexion" id="logout" value="Déconnexion"/></form>');
+            //si l'utilisateur est connecté
+            else if (!isset($_SESSION['login']))
+                // echo les liens necessaire
+                echo ('<a href="inscription.php">Inscription</a>
+                <a href="connexion.php">Connexion</a></section>');
+            ?>
+    </header>
+
+
     <!--formulaire d'inscription-->
     <div class="center">
         <h1>Inscription</h1>

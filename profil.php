@@ -30,6 +30,27 @@ else {
     <!--Cette page possède un formulaire permettant à l’utilisateur de modifier son
     login et son mot de passe.-->
 
+
+    <header>
+        <h1>Salle de conférence</h1>
+        <section>
+            <a href="index.php">Accueil</a>
+            <a href="reservation-form.php">Réservez</a>
+            <a href="planning.php">Planning</a>
+            <?php //si l'utilisateur est connecté
+            if (isset($_SESSION['login']))
+                // echo les liens necessaire
+                echo ('<a href="profil.php">Profil</a></section>
+                <form action="index.php" method="post"><input type="submit" name="deconnexion" id="logout" value="Déconnexion"/></form>');
+            //si l'utilisateur est connecté
+            else if (!isset($_SESSION['login']))
+                // echo les liens necessaire
+                echo ('<a href="inscription.php">Inscription</a>
+                <a href="connexion.php">Connexion</a></section>');
+            ?>
+    </header>
+
+
     <!--formulaire de modification des informations du user-->
     <div class="center">
         <h1>Modifier mon Profil</h1>

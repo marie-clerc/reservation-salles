@@ -16,54 +16,72 @@ $user = new user(NULL, NULL);
 $user->connect();
 ?>
 <body>
-<!--Une page permettant de voir le planning de la salle
-Sur cette page on voit le planning de la semaine avec l’ensemble des
-réservations effectuées. Le planning se présente sous la forme d’un
-tableau avec les jours de la semaine en cours. Dans ce tableau, il y a en
-colonne les jours et les horaires en ligne. Sur chaque réservation, il est
-écrit le nom de la personne ayant réservé la salle ainsi que le titre. Si un
-utilisateur clique sur une réservation, il est amené sur une page dédiée.
+    <!--Une page permettant de voir le planning de la salle
+    Sur cette page on voit le planning de la semaine avec l’ensemble des
+    réservations effectuées. Le planning se présente sous la forme d’un
+    tableau avec les jours de la semaine en cours. Dans ce tableau, il y a en
+    colonne les jours et les horaires en ligne. Sur chaque réservation, il est
+    écrit le nom de la personne ayant réservé la salle ainsi que le titre. Si un
+    utilisateur clique sur une réservation, il est amené sur une page dédiée.
 
-Les réservations se font du lundi au vendredi et de 8h et 19h. Les créneaux
-ont une durée fixe d’une heure.-->
+    Les réservations se font du lundi au vendredi et de 8h et 19h. Les créneaux
+    ont une durée fixe d’une heure.-->
+    <header>
+        <h1>Salle de conférence</h1>
+        <section>
+            <a href="index.php">Accueil</a>
+            <a href="reservation-form.php">Réservez</a>
+            <a href="planning.php">Planning</a>
+            <?php //si l'utilisateur est connecté
+            if (isset($_SESSION['login']))
+                // echo les liens necessaire
+                echo ('<a href="profil.php">Profil</a></section>
+                    <form action="index.php" method="post"><input type="submit" name="deconnexion" id="logout" value="Déconnexion"/></form>');
+            //si l'utilisateur est connecté
+            else if (!isset($_SESSION['login']))
+                // echo les liens necessaire
+                echo ('<a href="inscription.php">Inscription</a>
+                    <a href="connexion.php">Connexion</a>');
+            ?>
+    </header>
 
-<div class="reservation">
-    <h1>Planning: </h1>
+    <div class="reservation">
+        <h1>Planning: </h1>
 
-    <table>
-        <thead>
-        <tr>
-            <th></th>
-            <th>Lundi</th>
-            <th>Mardi</th>
-            <th>Mercredi</th>
-            <th>Jeudi</th>
-            <th>Vendredi</th>
-        </tr>
-        </thead>
-        <tbody>
-            <?php
-            for($heure = 8 ; $heure <= 19 ; $heure++)
-            {
-                echo '<tr></tr>';
-                for($jour = 0 ; $jour <= 5 ; $jour++)
+        <table>
+            <thead>
+            <tr>
+                <th></th>
+                <th>Lundi</th>
+                <th>Mardi</th>
+                <th>Mercredi</th>
+                <th>Jeudi</th>
+                <th>Vendredi</th>
+            </tr>
+            </thead>
+            <tbody>
+                <?php
+                for($heure = 8 ; $heure <= 19 ; $heure++)
                 {
-                    if($jour == 0)
+                    echo '<tr></tr>';
+                    for($jour = 0 ; $jour <= 5 ; $jour++)
                     {
-                        echo '<th>' .$heure.'h </th>';
-                    }
-                    else{
-                        $user->planning($jour,$heure);
+                        if($jour == 0)
+                        {
+                            echo '<th>' .$heure.'h </th>';
+                        }
+                        else{
+                            $user->planning($jour,$heure);
+                        }
                     }
                 }
-            }
-            ?>
-        </tbody>
-    </table>
+                ?>
+            </tbody>
+        </table>
 
-    <div class="signup_link">
-        <a href="index.php">Accueil</a>
+        <div class="signup_link">
+            <a href="index.php">Accueil</a>
+        </div>
     </div>
-</div>
 </body>
 </html>

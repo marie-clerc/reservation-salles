@@ -1,3 +1,8 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 body {
     margin: 0;
     padding: 0;
@@ -6,19 +11,66 @@ body {
     background-attachment: fixed;
     height: 100vh;
     width: 98%;
+    overflow-x: hidden;
 }
-/*page index.php*/
-.index {
+
+header {
+    /*box-shadow: 1px 13px 56px -1px rgba(0,0,0,0.38);*/
+    width: 100vw;
+    background-color: rgba(255, 255, 255, .5);
+    padding: 0 0 20px 0;
+    margin-bottom: 3rem;
     display: grid;
     place-items: center;
-    width: 100%;
-    height: 100vh;
+
 }
-.index .liens {
-    display: flex;
-    justify-content: space-evenly;
+#logout {
+    width: auto;
+    height: auto;
+    background: none;
+    color: black;
+    font-size: small;
+    background: #e0ac99;
+    border: none;
+    padding: 2px 5px;
+}
+.index {
+    background-image: none;
     width: 100%;
 }
+.index article {
+    width: 70%;
+    margin: auto;
+    display: grid;
+    place-items: center;
+}
+
+.index img {
+    border-radius: 10px;
+    box-shadow: 0px 0px 17px 0px rgba(0,0,0,0.52);
+}
+.index p {
+    padding: 1rem 0;
+}
+.index h2 {
+    padding: 2rem;
+}
+.index h4 {
+    padding: 1rem 0;
+}
+.index h3 {
+    padding: 2rem 0;
+}
+.index button {
+    padding: 1rem;
+    margin: 1em;
+    border-radius: 10px;
+    border: none;
+    background-color: bisque;
+    color: orangered;
+}
+
+
 .liens a {
     display: grid;
     place-items: center;
@@ -66,6 +118,7 @@ table {
     width: 90%;
     background-color: white;
     border-radius: 10px;
+    padding-top: 20px;
 }
 .reservation h1 {
     text-align: center;
@@ -78,6 +131,7 @@ table {
 }
 .reservation table td {
     padding: 5px;
+    text-align: center;
     border: black 1px solid;
 }
 
@@ -99,6 +153,7 @@ table {
 
 .center {
     padding: 0 40px;
+    padding-top: 20px;
     box-sizing: border-box;
 }
 .txt_field {
